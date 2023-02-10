@@ -1,6 +1,6 @@
 ## SOLID Principles
 
-*   **SRP**: The Single Responsibility Principle
+*   [**SRP**](#single-responsibility-principle): The Single Responsibility Principle
 
     An active corollary to Conway’s law: The best structure for a software system is heavily influenced by the social structure of the organization that uses it so that each software module has one, and only one, reason to change.
 
