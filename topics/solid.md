@@ -4,7 +4,7 @@
 
     An active corollary to Conway’s law: The best structure for a software system is heavily influenced by the social structure of the organization that uses it so that each software module has one, and only one, reason to change.
 
-*   **OCP**: The Open-Closed Principle
+*   [**OCP**](#open-closed-principle): The Open-Closed Principle
 
     Bertrand Meyer made this principle famous in the 1980s. The gist is that for software systems to be easy to change, they must be designed to allow the behavior of those systems to be changed by adding new code, rather than changing existing code.
 
@@ -125,3 +125,147 @@ int main() {
   computer.Start();
 }
 ```
+
+### Open Closed Principle
+
+*A software artifact should be open for extension but closed for modification.*
+
+Not extensible without modification:
+
+```c++
+enum class COLOR { RED, GREEN, BLUE };
+enum class SIZE { SMALL, MEDIUM, LARGE };
+
+struct Product {
+    string  m_name;
+    COLOR   m_color;
+    SIZE    m_size;
+};
+
+using Items = vector<Product*>;
+#define ALL(C)  begin(C), end(C)
+
+struct ProductFilter {
+    static Items by_color(Items items, const COLOR e_color) {
+        Items result;
+        for (auto &i : items)
+            if (i->m_color == e_color)
+                result.push_back(i);
+        return result;
+    }
+    static Items by_size(Items items, const SIZE e_size) {
+        Items result;
+        for (auto &i : items)
+            if (i->m_size == e_size)
+                result.push_back(i);
+        return result;
+    }
+    static Items by_size_and_color(Items items, const SIZE e_size, const COLOR e_color) {
+        Items result;
+        for (auto &i : items)
+            if (i->m_size == e_size && i->m_color == e_color)
+                result.push_back(i);
+        return result;
+    }
+};
+
+int main() {
+    const Items all{
+        new Product{"Apple", COLOR::GREEN, SIZE::SMALL},
+        new Product{"Tree", COLOR::GREEN, SIZE::LARGE},
+        new Product{"House", COLOR::BLUE, SIZE::LARGE},
+    };
+
+    for (auto &p : ProductFilter::by_color(all, COLOR::GREEN))
+        cout << p->m_name << " is green\n";
+
+    for (auto &p : ProductFilter::by_size_and_color(all, SIZE::LARGE, COLOR::GREEN))
+        cout << p->m_name << " is green & large\n";
+
+    return EXIT_SUCCESS;
+}
+/*
+Apple is green
+Tree is green
+Tree is green & large
+*/
+```
+
+Now extensible:
+
+```cpp
+template <typename T>
+struct Specification {
+    virtual ~Specification() = default;
+    virtual bool is_satisfied(T *item) const = 0;
+};
+
+struct ColorSpecification : Specification<Product> {
+    COLOR e_color;
+    ColorSpecification(COLOR e_color) : e_color(e_color) {}
+    bool is_satisfied(Product *item) const { return item->m_color == e_color; }
+};
+
+struct SizeSpecification : Specification<Product> {
+    SIZE e_size;
+    SizeSpecification(SIZE e_size) : e_size(e_size) {}
+    bool is_satisfied(Product *item) const { return item->m_size == e_size; }
+};
+
+template <typename T>
+struct Filter {
+    virtual vector<T *> filter(vector<T *> items, const Specification<T> &spec) = 0;
+};
+
+struct BetterFilter : Filter<Product> {
+    vector<Product *> filter(vector<Product *> items, const Specification<Product> &spec) {
+        vector<Product *> result;
+        for (auto &p : items)
+            if (spec.is_satisfied(p))
+                result.push_back(p);
+        return result;
+    }
+};
+
+// ------------------------------------------------------------------------------------------------
+BetterFilter bf;
+for (auto &x : bf.filter(all, ColorSpecification(COLOR::GREEN)))
+    cout << x->m_name << " is green\n";
+
+```
+
+Combining filters:
+
+```c++
+template <typename T>
+struct AndSpecification : Specification<T> {
+    const Specification<T> &first;
+    const Specification<T> &second;
+
+    AndSpecification(const Specification<T> &first, const Specification<T> &second)
+    : first(first), second(second) {}
+
+    bool is_satisfied(T *item) const { 
+        return first.is_satisfied(item) && second.is_satisfied(item); 
+    }
+};
+
+template <typename T>
+AndSpecification<T> operator&&(const Specification<T> &first, const Specification<T> &second) {
+    return {first, second};
+}
+
+// -----------------------------------------------------------------------------------------------------
+
+auto green_things = ColorSpecification{COLOR::GREEN};
+auto large_things = SizeSpecification{SIZE::LARGE};
+
+BetterFilter bf;
+for (auto &x : bf.filter(all, green_things && large_things))
+    cout << x->m_name << " is green and large\n";
+
+// warning: the following will compile but will NOT work
+// auto spec2 = SizeSpecification{SIZE::LARGE} &&
+//              ColorSpecification{COLOR::BLUE};
+```
+
