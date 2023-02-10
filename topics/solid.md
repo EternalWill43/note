@@ -269,3 +269,8 @@ for (auto &x : bf.filter(all, green_things && large_things))
 //              ColorSpecification{COLOR::BLUE};
 ```
 
+### Liskov Substitute Principle
+
+*What is wanted here is something like the following substitution property: If for each object o1 of type S there is an object o2 of type T such that for all programs P defined in terms of T, the behavior of P is unchanged when o1 is substituted for o2 then S is a subtype of T.1*
+
+***IF*** the supertype isn't abstract and can be implemented, it should be replaceable by a subtype class instance without breaking the application.
