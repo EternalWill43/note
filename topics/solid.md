@@ -80,10 +80,48 @@ class Employee {
     //...
 public:
     double calculateOvertime(int hours, Department kDepartmentName) {
-        overtimeCalculator.calculateOvertime(hours, kDepartmentname);
+        return overtimeCalculator.calculateOvertime(hours, kDepartmentname);
     }
 }
 
 ```
 
 In a situation like that, where you know there is going to be similar functionality but might differ slightly depending on the actor who calls it, you want to keep the interface simple and unchanging, i.e., you only ever have to provide the hours and department, and the facade heirarchy will be able to change without you ever needing to alter that source file, so that way, if the Payroll Department overtime needs to change, only the class PayrollOvertimeCalculator needs to be altered.
+
+Another example from Wikipedia:
+
+```c++
+struct CPU {
+  void Freeze();
+  void Jump(long position);
+  void Execute();
+};
+
+struct HardDrive {
+  char* Read(long lba, int size);
+};
+
+struct Memory {
+  void Load(long position, char* data);
+};
+
+class ComputerFacade {
+ public:
+  void Start() {
+    cpu_.Freeze();
+    memory_.Load(kBootAddress, hard_drive_.Read(kBootSector, kSectorSize));
+    cpu_.Jump(kBootAddress);
+    cpu_.Execute();
+  }
+
+ private:
+  CPU cpu_;
+  Memory memory_;
+  HardDrive hard_drive_;
+};
+
+int main() {
+  ComputerFacade computer;
+  computer.Start();
+}
+```
