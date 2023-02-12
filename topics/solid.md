@@ -8,15 +8,15 @@
 
     Bertrand Meyer made this principle famous in the 1980s. The gist is that for software systems to be easy to change, they must be designed to allow the behavior of those systems to be changed by adding new code, rather than changing existing code.
 
-*   **LSP**: The Liskov Substitution Principle
+*   [**LSP**](#liskov-substitute-principle): The Liskov Substitution Principle
 
     Barbara Liskov’s famous definition of subtypes, from 1988. In short, this principle says that to build software systems from interchangeable parts, those parts must adhere to a contract that allows those parts to be substituted one for another.
 
-*   **ISP**: The Interface Segregation Principle
+*   [**ISP**](#interface-segregation-principle): The Interface Segregation Principle
 
     This principle advises software designers to avoid depending on things that they don't use.
 
-*   **DIP**: The Dependency Inversion Principle
+*   [**DIP**](#dependency-inversion-principle): The Dependency Inversion Principle
 
     The code that implements high-level policy should not depend on code that implements low-level details. Rather, details should depend on policies.
 
@@ -274,3 +274,15 @@ for (auto &x : bf.filter(all, green_things && large_things))
 *What is wanted here is something like the following substitution property: If for each object o1 of type S there is an object o2 of type T such that for all programs P defined in terms of T, the behavior of P is unchanged when o1 is substituted for o2 then S is a subtype of T.1*
 
 ***IF*** the supertype isn't abstract and can be implemented, it should be replaceable by a subtype class instance without breaking the application.
+
+### Interface Segregation Principle
+
+You are working on system S, you want to introduce framework F into the system, and framework F specifically only works with database D:
+
+S -> F -> D
+
+If something changes or breaks in D (that you weren't even using in S), S can still fail.
+
+### Dependency Inversion Principle
+
+Source code dependencies should depend on abstractions and not concretions.
